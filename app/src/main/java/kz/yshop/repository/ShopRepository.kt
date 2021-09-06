@@ -23,6 +23,12 @@ class ShopRepository @Inject constructor(
 
     suspend fun getShop(id: String = "443") = checkResponse(api.getShop(id = id))
 
+    suspend fun getMainPageProducts(id: String = "443") =
+
+        checkResponse(api.getMainPageProducts(id = id))
+
+    suspend fun getProductDetail(id: String) =
+        checkResponse(api.getProductDetail(id = id))
 
     private fun <T : Any> checkResponse(data: Response<T>): Resource<T> {
         if (data.isSuccessful) {

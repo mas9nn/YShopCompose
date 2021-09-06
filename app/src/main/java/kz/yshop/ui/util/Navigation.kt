@@ -11,6 +11,7 @@ import com.google.accompanist.navigation.animation.composable
 import androidx.navigation.compose.dialog
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.navigation.animation.AnimatedNavHost
+import kz.yshop.ui.details.DetailsScreen
 import kz.yshop.ui.dialogs.ErrorDialog
 import kz.yshop.ui.main.MainScreen
 import kz.yshop.ui.main.MainScreenViewModel
@@ -55,7 +56,10 @@ fun Navigation(navController: NavHostController, viewModel: MainScreenViewModel)
                 }
             }
         ) {
-            MainScreen(viewModel)
+            MainScreen(navController,viewModel)
+        }
+        composable(Screen.ProductDetails.route){
+            DetailsScreen(navHostController = navController,viewModel = viewModel)
         }
         dialog(Screen.errorDialog.route) {
             ErrorDialog()
