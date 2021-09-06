@@ -27,8 +27,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import coil.annotation.ExperimentalCoilApi
+import com.google.accompanist.insets.*
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kz.yshop.ui.components.Drawer
@@ -48,58 +52,65 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var sharedPreferences: SharedPreferences
 
+    @ExperimentalPagerApi
     @ExperimentalCoilApi
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             YShopTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    val drawerState = rememberDrawerState(DrawerValue.Closed)
-                    val scope = rememberCoroutineScope()
-                    val openDrawer = {
-                        scope.launch {
-                            drawerState.open()
+                ProvideWindowInsets() {
+                    Surface(color = MaterialTheme.colors.background) {
+                        val drawerState = rememberDrawerState(DrawerValue.Closed)
+                        val scope = rememberCoroutineScope()
+                        val openDrawer = {
+                            scope.launch {
+                                drawerState.open()
+                            }
                         }
-                    }
-                    val navController = rememberAnimatedNavController()
-                    viewModel.error.observe(this, { action ->
-                        Timber.wtf("observer $action")
-                        com.google.android.material.snackbar.Snackbar.make(
-                            window.decorView.rootView,
-                            "Error",
-                            com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
-                        ).setAction("Retry") {
-                            Timber.wtf("onClick")
-                            action
-                        }.show()
-                    })
-                    if (viewModel.openDrawer.value) {
-                        scope.launch {
-                            viewModel.openDrawer.value = false
-                            drawerState.open()
+                        val navController = rememberAnimatedNavController()
+                        viewModel.error.observe(this, { action ->
+                            Timber.wtf("observer $action")
+                            com.google.android.material.snackbar.Snackbar.make(
+                                window.decorView.rootView,
+                                "Error",
+                                com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
+                            ).setAction("Retry") {
+                                Timber.wtf("onClick")
+                                action
+                            }.show()
+                        })
+                        if (viewModel.openDrawer.value) {
+                            scope.launch {
+                                viewModel.openDrawer.value = false
+                                drawerState.open()
+                            }
                         }
-                    }
-                    Box(modifier = Modifier.fillMaxSize()) {
                         ModalDrawer(
                             drawerState = drawerState,
                             gesturesEnabled = true,
                             drawerContent = {
-                                Drawer(
-                                    onDestinationClicked = { route ->
-                                        scope.launch {
-                                            drawerState.close()
+                                Box(modifier = Modifier.statusBarsPadding()) {
+                                    Drawer(
+                                        onDestinationClicked = { route ->
+                                            scope.launch {
+                                                drawerState.close()
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         ) {
                             if (viewModel.shopInfo.value != null && viewModel.mainPage.value != null) {
                                 Column() {
                                     CustomTopBar(viewModel)
-                                    Navigation(navController = navController, viewModel = viewModel)
+                                    Navigation(
+                                        navController = navController,
+                                        viewModel = viewModel
+                                    )
                                 }
                             }
                         }
@@ -108,9 +119,12 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     @ExperimentalAnimationApi
     @Composable
     private fun CustomTopBar(viewModel: MainScreenViewModel) {
+        val systemUiController = rememberSystemUiController()
+        val insets = LocalWindowInsets.current
         var searchText by remember() {
             mutableStateOf("")
         }
@@ -133,6 +147,7 @@ class MainActivity : ComponentActivity() {
                 ),
             Arrangement.Top
         ) {
+            Spacer(modifier = Modifier.statusBarsHeight())
             AnimatedVisibility(visible = viewModel.scrollState.value) {
                 ScrollableContentTopBar(this@MainActivity.viewModel)
             }
@@ -184,7 +199,8 @@ class MainActivity : ComponentActivity() {
                     ) {
                         TextField(
                             modifier = Modifier
-                                .align(Alignment.Start).fillMaxSize(),
+                                .align(Alignment.Start)
+                                .fillMaxSize(),
                             value = searchText,
                             onValueChange = {
                                 searchText = it

@@ -15,7 +15,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import kz.yshop.data.remote.responses.MainPageProducts.Data
+import kz.yshop.R
 import kz.yshop.data.remote.responses.MainPageProducts.Product
 import kz.yshop.data.remote.responses.ShopAbout.Shop
 import kz.yshop.ui.util.Screen
@@ -53,7 +52,10 @@ var controller: NavHostController? = null
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
-fun MainScreen(navController: NavHostController, viewModel: MainScreenViewModel) {
+fun MainScreen(
+    navController: NavHostController,
+    viewModel: MainScreenViewModel
+) {
     controller = navController
     shop = viewModel.shopInfo.value
 
@@ -187,7 +189,7 @@ fun ProductItem(
                     data = BASE_URL + item.images[0],
                     builder = {
                         crossfade(true)
-                    }
+                    },
                 ),
                 contentScale = ContentScale.Crop,
                 contentDescription = null,

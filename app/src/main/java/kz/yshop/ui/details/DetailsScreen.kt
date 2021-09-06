@@ -74,7 +74,13 @@ fun DetailsScreen(navHostController: NavHostController, viewModel: MainScreenVie
                                 .clickable {
                                     index = ind
                                     coroutineScope.launch {
-                                        lazyRowScope.animateScrollToItem(ind)
+                                        lazyRowScope.animateScrollToItem(
+                                            if (ind != 0) {
+                                                ind - 1
+                                            } else {
+                                                ind
+                                            }
+                                        )
                                     }
                                 }
                                 .widthIn(90.dp, 110.dp)

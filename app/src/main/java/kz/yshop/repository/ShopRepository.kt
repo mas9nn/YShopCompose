@@ -21,9 +21,9 @@ class ShopRepository @Inject constructor(
         checkResponse(api.getDemoUser(deviceToken = deviceToken))
 
 
-    suspend fun getShop(id: String = "443") = checkResponse(api.getShop(id = id))
+    suspend fun getShop(id: String = "448") = checkResponse(api.getShop(id = id))
 
-    suspend fun getMainPageProducts(id: String = "443") =
+    suspend fun getMainPageProducts(id: String = "448") =
 
         checkResponse(api.getMainPageProducts(id = id))
 
