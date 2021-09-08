@@ -5,5 +5,5 @@ import kz.yshop.data.remote.responses.ShopAbout.Shop
 
 interface ShopRepository {
 
-    suspend fun getShop(id: String = "448"):Resource<Shop>
+    suspend fun getShop(id: String = "443"):Resource<Shop>
 }

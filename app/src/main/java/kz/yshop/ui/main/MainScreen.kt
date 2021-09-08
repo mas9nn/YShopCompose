@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -83,8 +83,8 @@ fun ListWithHeader(
     mainScreenViewModel: MainScreenViewModel = hiltViewModel()
 ) {
     val listState = rememberLazyListState()
-
     viewModel.scrollState.value = listState.firstVisibleItemIndex == 0
+
     if (mainScreenViewModel.shopInfo.value.products != null) {
         val data = mainScreenViewModel.shopInfo.value.products!!.data
         LazyColumn(

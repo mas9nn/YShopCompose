@@ -11,11 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +27,6 @@ import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kz.yshop.ui.activity.MainActivityViewModel
-
 import kz.yshop.ui.main.components.ScrollableContentTopBar
 
 @ExperimentalAnimationApi
@@ -67,14 +62,15 @@ fun CustomTopBar(viewModel: MainActivityViewModel = hiltViewModel()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(55.dp)
                 .padding(horizontal = 14.dp), Arrangement.SpaceEvenly
         ) {
             IconButton(
                 modifier = Modifier
                     .size(50.dp)
                     .clip(shape = RoundedCornerShape(12.dp))
-                    .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f)),
+                    .background(Color.White.copy(alpha = 0.2f))
+                    .align(Alignment.Bottom),
                 onClick = {
                     viewModel.openDrawer.value = true
                 }) {
@@ -88,10 +84,11 @@ fun CustomTopBar(viewModel: MainActivityViewModel = hiltViewModel()) {
             Spacer(modifier = Modifier.width(8.dp))
             Row(
                 modifier = Modifier
-                    .fillMaxHeight()
+                    .height(50.dp)
                     .weight(0.2f)
                     .clip(shape = RoundedCornerShape(12.dp))
-                    .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f)),
+                    .background(Color.White.copy(alpha = 0.2f))
+                    .align(Alignment.Bottom),
                 Arrangement.Start
             ) {
                 Icon(
@@ -144,19 +141,41 @@ fun CustomTopBar(viewModel: MainActivityViewModel = hiltViewModel()) {
                 }
             }
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(shape = RoundedCornerShape(12.dp))
-                    .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f)),
-                onClick = {
-                }) {
-                Icon(
-                    imageVector = Icons.Filled.AddShoppingCart,
-                    contentDescription = "Button Cart",
+            Box(modifier = Modifier.size(55.dp)) {
+                IconButton(
                     modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                )
+                        .size(50.dp)
+                        .clip(shape = RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.2f))
+                        .align(Alignment.BottomStart),
+                    onClick = {
+                    }) {
+                    Icon(
+                        imageVector = Icons.Filled.AddShoppingCart,
+                        contentDescription = "Button Cart",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(shape = RoundedCornerShape(50))
+                        .background(Color.White)
+                        .align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        text = "11", style = TextStyle(
+                            color = Color.Black,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal
+                        ),
+                        modifier = Modifier
+                            .padding(vertical = 3.dp, horizontal = 4.dp)
+                            .align(
+                                Alignment.TopEnd
+                            )
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(14.dp))
