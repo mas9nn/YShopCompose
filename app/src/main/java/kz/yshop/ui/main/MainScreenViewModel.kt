@@ -1,7 +1,6 @@
 package kz.yshop.ui.main
 
-import android.content.SharedPreferences
-import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,11 +11,8 @@ import kz.yshop.data.remote.Util.Resource
 import kz.yshop.data.remote.responses.MainPageProducts.MainPageProducts
 import kz.yshop.data.remote.responses.MainPageProducts.Product
 import kz.yshop.data.remote.responses.ProductDetail.ProductDetail
-import kz.yshop.data.remote.responses.ShopAbout.Shop
-import kz.yshop.repository.ShopRepository
-import kz.yshop.ui.util.Error
-import kz.yshop.util.Constants.USER_HASH
-import kz.yshop.util.Constants.userMainHash
+import kz.yshop.domain.repository.ProductRepository
+import kz.yshop.domain.repository.ShopRepository
 import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
@@ -24,61 +20,28 @@ import javax.inject.Inject
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
     private val repository: ShopRepository,
-    private val sharedPreferences: SharedPreferences,
+    private val productRepository: ProductRepository
 ) : ViewModel() {
 
     init {
-        val hash = sharedPreferences.getString(USER_HASH, "")
-        if (hash.isNullOrEmpty()) {
-            getUser()
-        } else {
-            userMainHash = hash
-            Timber.wtf(userMainHash)
-            getShop()
-            getMainPage()
-        }
+        getShop()
     }
 
-    val error: MutableLiveData<() -> Unit> = MutableLiveData()
+    private val _shopInfo = mutableStateOf(MainScreenState())
+    val shopInfo: State<MainScreenState> = _shopInfo
 
-    var shopInfo = mutableStateOf<Shop?>(null)
-
-    var mainPage = mutableStateOf<MainPageProducts?>(null)
-
-    var productDetail = mutableStateOf<ProductDetail?>(null)
-
-    val openDrawer = mutableStateOf(false)
-
-    val scrollState = mutableStateOf(false)
-
-    var selectedProduct:Product? = null
-
-    fun getUser() {
-        viewModelScope.launch {
-            when (val response = repository.getDemoUser("deviceToken${UUID.randomUUID()}")) {
-                is Resource.Success -> {
-                    userMainHash = response.data!!.data.hash
-                    Timber.wtf(userMainHash)
-                    sharedPreferences.edit().putString(USER_HASH, userMainHash).apply()
-                    getShop()
-                    getMainPage()
-                }
-                else -> {
-                    //error.postValue(Error.UserDemo.responseName)
-                }
-            }
-        }
-    }
-
-    fun getShop() {
+    private fun getShop() {
         viewModelScope.launch {
             when (val response = repository.getShop()) {
                 is Resource.Success -> {
-                    shopInfo.value = response.data
+                    _shopInfo.value = MainScreenState(shop = response.data)
+                    getMainPage()
+                }
+                is Resource.Loading -> {
+                    //  _shopInfo.value = MainScreenState(isLoading = true)
                 }
                 else -> {
-                    Timber.wtf("error")
-                    error.postValue { getShop() }
+                    _shopInfo.value = MainScreenState(error = response.message ?: "Error occurred")
                 }
             }
         }
@@ -86,30 +49,20 @@ class MainScreenViewModel @Inject constructor(
 
     fun getMainPage() {
         viewModelScope.launch {
-            when (val response = repository.getMainPageProducts()) {
+            when (val response = productRepository.getMainPageProducts()) {
                 is Resource.Success -> {
-                    mainPage.value = response.data
+                    val oldData = _shopInfo.value
+                    _shopInfo.value = MainScreenState(shop = oldData.shop, products = response.data)
+                }
+                is Resource.Loading -> {
+                    // _shopInfo.value = MainScreenState(isLoading = true)
                 }
                 else -> {
-                    Timber.wtf("error")
-                    error.postValue { getMainPage() }
+                    _shopInfo.value = MainScreenState(error = response.message ?: "Error occurred")
                 }
             }
         }
     }
 
-    fun getProductDetail(id:String){
-        viewModelScope.launch {
-            when (val response = repository.getProductDetail(id)) {
-                is Resource.Success -> {
-                    productDetail.value = response.data
-                }
-                else -> {
-                    Timber.wtf("error")
-                    error.postValue { getMainPage() }
-                }
-            }
-        }
-    }
 
 }

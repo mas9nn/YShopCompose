@@ -1,6 +1,7 @@
 package kz.yshop.data.remote.responses.MainPageProducts
 
 import android.os.Parcelable
+import com.google.gson.Gson
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -20,5 +21,6 @@ data class Product(
     val images: List<String>,
     val price: String,
     val quantity: Int,
-    val title: String
-): Parcelable
+    val title: String,
+    var currency: String = ""
+) : Parcelable

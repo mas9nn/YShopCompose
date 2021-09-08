@@ -24,154 +24,163 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.launch
-import kz.yshop.ui.main.MainScreenViewModel
+import kz.yshop.ui.activity.MainActivityViewModel
 import kz.yshop.util.Constants
 
 
 @ExperimentalCoilApi
 @ExperimentalPagerApi
 @Composable
-fun DetailsScreen(navHostController: NavHostController, viewModel: MainScreenViewModel) {
+fun DetailsScreen(
+    navHostController: NavHostController,
+    viewModel: MainActivityViewModel,
+    detailsScreenViewModel: DetailsScreenViewModel = hiltViewModel()
+) {
     var index by remember {
         mutableStateOf(0)
     }
-    val product = viewModel.selectedProduct
     viewModel.scrollState.value = false
-    viewModel.getProductDetail(product!!.id.toString())
-    val coroutineScope = rememberCoroutineScope()
-    val lazyRowScope = rememberLazyListState()
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Image(
-                    painter = rememberImagePainter(
-                        data = Constants.BASE_URL + product!!.images[index],
-                        builder = {
-                            crossfade(true)
-                        }
-                    ),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .height(350.dp)
-                        .fillMaxWidth(0.7f)
-                        .align(Alignment.CenterHorizontally)
-                )
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    state = lazyRowScope
-                ) {
-                    itemsIndexed(product.images) { ind, image ->
-                        Card(
-                            modifier = Modifier
-                                .shadow(0.dp)
-                                .clickable {
-                                    index = ind
-                                    coroutineScope.launch {
-                                        lazyRowScope.animateScrollToItem(
-                                            if (ind != 0) {
-                                                ind - 1
-                                            } else {
-                                                ind
-                                            }
-                                        )
-                                    }
-                                }
-                                .widthIn(90.dp, 110.dp)
-                                .heightIn(76.dp, 96.dp)
-                                .clip(shape = RoundedCornerShape(8.dp))
-                                .padding(start = 5.dp, top = 5.dp, bottom = 5.dp)
-                        ) {
-                            Image(
-                                painter = rememberImagePainter(
-                                    data = Constants.BASE_URL + product.images[ind],
-                                    builder = {
-                                        crossfade(true)
-                                    }
-                                ),
-                                contentScale = ContentScale.Crop,
-                                contentDescription = null,
+    val productDetails = detailsScreenViewModel.detailState.value
+
+    if (viewModel.product != null && productDetails.productDetail != null) {
+        val product = viewModel.product
+        val coroutineScope = rememberCoroutineScope()
+        val lazyRowScope = rememberLazyListState()
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Image(
+                        painter = rememberImagePainter(
+                            data = Constants.BASE_URL + product!!.images[index],
+                            builder = {
+                                crossfade(true)
+                            }
+                        ),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .height(350.dp)
+                            .fillMaxWidth(0.7f)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        state = lazyRowScope
+                    ) {
+                        itemsIndexed(product.images) { ind, image ->
+                            Card(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        Color.White.copy(
-                                            alpha = if (index == ind) {
-                                                0f
-                                            } else {
-                                                0.4f
-                                            }
+                                    .shadow(0.dp)
+                                    .clickable {
+                                        index = ind
+                                        coroutineScope.launch {
+                                            lazyRowScope.animateScrollToItem(
+                                                if (ind != 0) {
+                                                    ind - 1
+                                                } else {
+                                                    ind
+                                                }
+                                            )
+                                        }
+                                    }
+                                    .widthIn(90.dp, 110.dp)
+                                    .heightIn(76.dp, 96.dp)
+                                    .clip(shape = RoundedCornerShape(8.dp))
+                                    .padding(start = 5.dp, top = 5.dp, bottom = 5.dp)
+                            ) {
+                                Image(
+                                    painter = rememberImagePainter(
+                                        data = Constants.BASE_URL + product.images[ind],
+                                        builder = {
+                                            crossfade(true)
+                                        }
+                                    ),
+                                    contentScale = ContentScale.Crop,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            Color.White.copy(
+                                                alpha = if (index == ind) {
+                                                    0f
+                                                } else {
+                                                    0.4f
+                                                }
+                                            )
                                         )
-                                    )
-                            )
+                                )
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(40.dp))
+                    Text(
+                        text = product.title,
+                        style = TextStyle(
+                            color = Color.Black,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = if (productDetails.productDetail != null) {
+                            productDetails.productDetail!!.data.product.description!!
+                        } else {
+                            ""
+                        },
+                        style = TextStyle(
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = if (productDetails.productDetail != null) {
+                            productDetails.productDetail!!.data.product.description!!
+                        } else {
+                            ""
+                        },
+                        style = TextStyle(
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = if (productDetails.productDetail != null) {
+                            productDetails.productDetail!!.data.product.description!!
+                        } else {
+                            ""
+                        },
+                        style = TextStyle(
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Start,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
                 }
-                Spacer(modifier = Modifier.height(40.dp))
-                Text(
-                    text = product.title,
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Text(
-                    text = if (viewModel.productDetail.value != null) {
-                        viewModel.productDetail.value!!.data.product.description!!
-                    } else {
-                        ""
-                    },
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Start,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Text(
-                    text = if (viewModel.productDetail.value != null) {
-                        viewModel.productDetail.value!!.data.product.description!!
-                    } else {
-                        ""
-                    },
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Start,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Text(
-                    text = if (viewModel.productDetail.value != null) {
-                        viewModel.productDetail.value!!.data.product.description!!
-                    } else {
-                        ""
-                    },
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Start,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
             }
         }
     }
+
 }

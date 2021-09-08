@@ -10,7 +10,12 @@ import dagger.hilt.components.SingletonComponent
 import kz.yshop.data.db.YShopDatabase
 import kz.yshop.data.remote.YShopApi
 import kz.yshop.data.remote.interceptors.AuthInterceptor
-import kz.yshop.repository.ShopRepository
+import kz.yshop.data.repository.ProductRepositoryImpl
+import kz.yshop.data.repository.ShopRepositoryImpl
+import kz.yshop.data.repository.UserRepositoryImpl
+import kz.yshop.domain.repository.ProductRepository
+import kz.yshop.domain.repository.ShopRepository
+import kz.yshop.domain.repository.UserRepository
 import kz.yshop.util.Constants
 import kz.yshop.util.Constants.SHARED_PREF_NAME
 import okhttp3.OkHttpClient
@@ -26,8 +31,21 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideShopRepository(api: YShopApi, database: YShopDatabase) =
-        ShopRepository(api = api, database = database)
+    fun provideUserRepository(api: YShopApi): UserRepository {
+        return UserRepositoryImpl(api = api)
+    }
+
+    @Singleton
+    @Provides
+    fun provideProductRepository(api: YShopApi): ProductRepository {
+        return ProductRepositoryImpl(api = api)
+    }
+
+    @Singleton
+    @Provides
+    fun provideShopRepository(api: YShopApi): ShopRepository {
+        return ShopRepositoryImpl(api = api)
+    }
 
     @Singleton
     @Provides

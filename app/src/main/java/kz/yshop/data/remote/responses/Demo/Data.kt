@@ -8,5 +8,5 @@ import androidx.room.PrimaryKey
 data class Data(
     val hash: String,
     @PrimaryKey
-    val id: Int
+    val id: Int = 0
 )
